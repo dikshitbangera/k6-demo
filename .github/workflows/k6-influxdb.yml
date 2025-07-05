@@ -37,6 +37,6 @@ jobs:
 
       - name: Run k6 Load Test and push to InfluxDB
         env:
-          INFLUXDB_URL: http://influxdb:8086
+          INFLUXDB_URL: http://localhost:8086/k6
         run: |
           k6 run --out influxdb=$INFLUXDB_URL test.js
