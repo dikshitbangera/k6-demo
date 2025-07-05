@@ -9,21 +9,23 @@ jobs:
   performance-test:
     runs-on: ubuntu-latest
 
+    services:
+      influxdb:
+        image: influxdb:1.8
+        ports:
+          - 8086:8086
+        options: >-
+          --health-cmd="curl -f http://localhost:8086/ping || exit 1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+        env:
+          INFLUXDB_DB: k6
+
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v3
-
-    - name: Install k6
-      run: |
-        sudo apt update
-        sudo apt install -y gnupg ca-certificates
-        curl -s https://dl.k6.io/key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/k6-archive-keyring.gpg
-        echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
-        sudo apt update
-        sudo apt install -y k6
-
-    - name: Run k6 Load Test and push to InfluxDB
-      env:
-        INFLUXDB_URL: http://localhost:8086/k6  # Replace with your actual InfluxDB endpoint
-      run: |
-        k6 run --out influxdb=$INFLUXDB_URL test.js
+      # ...existing steps...
+      - name: Run k6 Load Test and push to InfluxDB
+        env:
+          INFLUXDB_URL: http://localhost:8086/k6
+        run: |
+          k6 run --out influxdb=$INFLUXDB_URL test.js
