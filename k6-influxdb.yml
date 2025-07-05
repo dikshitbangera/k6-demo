@@ -2,9 +2,7 @@ name: k6 Performance Test
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main ]
-  
+    
 jobs:
   performance-test:
     runs-on: ubuntu-latest
