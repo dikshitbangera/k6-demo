@@ -23,7 +23,18 @@ jobs:
           INFLUXDB_DB: k6
 
     steps:
-      # ...existing steps...
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install k6
+        run: |
+          sudo apt update
+          sudo apt install -y gnupg ca-certificates
+          curl -s https://dl.k6.io/key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/k6-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt update
+          sudo apt install -y k6
+
       - name: Run k6 Load Test and push to InfluxDB
         env:
           INFLUXDB_URL: http://localhost:8086/k6
