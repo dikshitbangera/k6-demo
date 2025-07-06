@@ -18,20 +18,21 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Install k6
+      - name: Install dependencies for building k6
         run: |
           sudo apt update
-          sudo apt install -y gnupg ca-certificates
-          curl -s https://dl.k6.io/key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/k6-archive-keyring.gpg
-          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
-          sudo apt update
-          sudo apt install -y k6
+          sudo apt install -y git make gcc
+
+      - name: Install xk6 and build k6 with influxdb extension
+        run: |
+          go install go.k6.io/xk6/cmd/xk6@latest
+          ~/go/bin/xk6 build --with github.com/grafana/xk6-output-influxdb@latest
 
       - name: Run k6 Load Test and push to InfluxDB
         env:
-          INFLUXDB_URL: https://us-east-1-1.aws.cloud2.influxdata.com/ 
+          INFLUXDB_URL: https://us-east-1-1.aws.cloud2.influxdata.com
           INFLUXDB_ORG: k6demo
           INFLUXDB_BUCKET: k6testbucket
-          INFLUXDB_TOKEN: ${{ secrets.INFLUXDB_TOKEN }} 
+          INFLUXDB_TOKEN: ${{ secrets.INFLUXDB_TOKEN }}
         run: |
-          k6 run --out influxdbv2=$INFLUXDB_URL?org=$INFLUXDB_ORG\&bucket=$INFLUXDB_BUCKET\&token=$INFLUXDB_TOKEN --env TPS=${{ github.event.inputs.tps }} test.js
+          ./k6 run --out xk6-influxdb=$INFLUXDB_URL?org=$INFLUXDB_ORG\&bucket=$INFLUXDB_BUCKET\&token=$INFLUXDB_TOKEN --env TPS=${{ github.event.inputs.tps }} test.js
