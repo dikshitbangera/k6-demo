@@ -12,11 +12,13 @@ export default function () {
     
     }
 
+
+const tps = __ENV.TPS ? parseInt(__ENV.TPS) : 2; // Default to 2 if not set
 export const options = {
     scenarios: {
         my_scenario: {
             executor: 'constant-arrival-rate',
-            rate: 2,
+            rate: tps,
             timeUnit: '1s',
             duration: '1m',
             preAllocatedVUs: 10,

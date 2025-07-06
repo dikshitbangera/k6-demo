@@ -2,25 +2,17 @@ name: k6 Performance Test
 
 on:
   workflow_dispatch:
+    inputs:
+      tps:
+        description: 'Transactions per second (TPS) for the load test'
+        required: true
+        default: '2'
   push:
     branches: main 
     
 jobs:
   performance-test:
     runs-on: ubuntu-latest
-
-    services:
-      influxdb:
-        image: influxdb:1.8
-        ports:
-          - 8086:8086
-        options: >-
-          --health-cmd="curl -f http://localhost:8086/ping || exit 1"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-        env:
-          INFLUXDB_DB: k6
 
     steps:
       - name: Checkout Repository
@@ -37,6 +29,9 @@ jobs:
 
       - name: Run k6 Load Test and push to InfluxDB
         env:
-          INFLUXDB_URL: http://localhost:8086/k6
+          INFLUXDB_URL: https://us-east-1-1.aws.cloud2.influxdata.com/ 
+          INFLUXDB_ORG: k6demo
+          INFLUXDB_BUCKET: k6testbucket
+          INFLUXDB_TOKEN: ${{ secrets.INFLUXDB_TOKEN }} 
         run: |
-          k6 run --out influxdb=$INFLUXDB_URL test.js
+          k6 run --out influxdb=$INFLUXDB_URL --env TPS=${{ github.event.inputs.tps }} test.js
