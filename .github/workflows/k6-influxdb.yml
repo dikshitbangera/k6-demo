@@ -34,4 +34,4 @@ jobs:
           INFLUXDB_BUCKET: k6testbucket
           INFLUXDB_TOKEN: ${{ secrets.INFLUXDB_TOKEN }} 
         run: |
-          k6 run --out influxdbv2=$INFLUXDB_URL?org=$INFLUXDB_ORG\&bucket=$INFLUXDB_BUCKET\&token=$INFLUXDB_TOKEN --env TPS=${{ github.event.inputs.tps }} test.js
+          k6 run --out influxdb=$INFLUXDB_URL?org=$INFLUXDB_ORG\&bucket=$INFLUXDB_BUCKET\&token=$INFLUXDB_TOKEN --env TPS=${{ github.event.inputs.tps }} test.js
